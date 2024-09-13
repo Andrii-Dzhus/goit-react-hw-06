@@ -1,42 +1,40 @@
-import { useState, useEffect } from "react";
-import contactDate from "../../contact.json";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  selectContacts,
+  addContact,
+  deleteContact,
+} from "../../redux/contactsSlice";
+import { selectNameFilter, changeFilter } from "../../redux/filtersSlice";
 import ContactList from "../ContactList/ContactList";
 import SearchBox from "../SearchBox/SearchBox";
 import ContactForm from "../ContactForm/ContactForm";
 
 export default function App() {
-  const [contacts, setContacts] = useState(() => {
-    const saveContacts = window.localStorage.getItem("contacts");
-    return saveContacts !== null ? JSON.parse(saveContacts) : contactDate;
-  });
+  const dispatch = useDispatch();
+  const contacts = useSelector(selectContacts);
+  const filter = useSelector(selectNameFilter);
 
-  useEffect(() => {
-    window.localStorage.setItem("contacts", JSON.stringify(contacts));
-  }, [contacts]);
-
-  const [filter, setFilter] = useState("");
-
-  const addContacts = newContacts => {
-    setContacts(prevContacts => {
-      return [...prevContacts, newContacts];
-    });
+  const addNewContact = newContact => {
+    dispatch(addContact(newContact));
   };
 
-  const deleteContacts = contactId => {
-    setContacts(prevContacts => {
-      return prevContacts.filter(contact => contact.id !== contactId);
-    });
+  const deleteContactById = contactId => {
+    dispatch(deleteContact(contactId));
   };
 
   const visibleContacts = contacts.filter(contact =>
     contact.name.toLowerCase().includes(filter.toLowerCase())
   );
+
   return (
     <div>
       <h1>Phonebook</h1>
-      <ContactForm onAdd={addContacts} />
-      <SearchBox value={filter} onFilter={setFilter} />
-      <ContactList contacts={visibleContacts} onDelete={deleteContacts} />
+      <ContactForm onAdd={addNewContact} />
+      <SearchBox
+        value={filter}
+        onFilter={filter => dispatch(changeFilter(filter))}
+      />
+      <ContactList contacts={visibleContacts} onDelete={deleteContactById} />
     </div>
   );
 }
