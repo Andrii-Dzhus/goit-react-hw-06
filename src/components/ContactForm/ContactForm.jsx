@@ -20,6 +20,7 @@ const ContactsSchema = Yup.object().shape({
 
 export default function ContactForm() {
   const dispatch = useDispatch();
+
   const handleSubmit = (values, actions) => {
     const newContact = { ...values, id: nanoid() };
     dispatch(addContact(newContact));
